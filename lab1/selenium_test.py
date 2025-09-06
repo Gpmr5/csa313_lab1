@@ -1,78 +1,71 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from dotenv import load_dotenv
-import os
 import time
-
-# .env файлыг уншиж орчны хувьсагч болгож байна
-load_dotenv()
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
 
 driver = webdriver.Chrome()
 
 try:
-    # Сайт руу орох
     driver.get("https://student.must.edu.mn")
     driver.maximize_window()
-    time.sleep(2)
+    time.sleep(2) 
 
-    # Нэвтрэх хэсгийн талбарууд
     username = driver.find_element(By.ID, "username")
     password = driver.find_element(By.ID, "password")
 
-    # .env файлаас уншсан нэвтрэх мэдээллээ ашиглаж байна
-    username.send_keys(USERNAME)
-    password.send_keys(PASSWORD)
+    username.send_keys("B232270015")  
+    password.send_keys("Gteb10140917")  
 
-    # "Нэвтрэх" товч дарах
+    # Login товчийг дарах
     login_button = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, "input.btn.btn-primary.btn-block"))
     )
     login_button.click()
-    time.sleep(3)
-
-    # Popup гарвал хаах
+    
+    time.sleep(3) 
     try:
         close_popup = WebDriverWait(driver, 2).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".popup-close, .close, .modal-close"))
         )
         close_popup.click()
     except TimeoutException:
-        pass
+        pass  
+    
 
-    # Амжилттай нэвтэрсэн эсэхийг шалгах
     try:
-        driver.find_element(By.ID, "logout")
+        driver.find_element(By.ID, "logout")  
         print("Амжилттай нэвтэрлээ!")
     except NoSuchElementException:
-        print("Нэвтрэлт амжилтгүй.")
+        print("Нэвтрэлт амжилтгүй. Алдаа гарсан байна.")
 
-    # "ОЮУТАН → Хувийн мэдээлэл" цэс рүү орох
     actions = ActionChains(driver)
     actions.move_by_offset(200, 300).click().perform()
-
+    
     oyutan_menu = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located((By.XPATH, '//a[span[text()="ОЮУТАН"]]'))
     )
     oyutan_menu.click()
-
     personal_info_menu = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located((By.XPATH, '//a[span[text()="Хувийн мэдээлэл"]]'))
     )
     personal_info_menu.click()
-
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'ul.rows > li'))
     )
 
-    # Жагсаалт унших
     list_items = driver.find_elements(By.CSS_SELECTOR, 'ul.rows > li')
-    student_data = {"major": "", "studentID": ""}
+
+    for item in list_items:
+        print(item.text)
+        
+    student_data = {
+        "major": "",
+        "studentID": ""
+    }
 
     for item in list_items:
         try:
@@ -90,10 +83,9 @@ try:
             pass
 
     print(student_data)
-
-    # Хүлээгдэж буй утгуудтай харьцуулах
+    
     major_expected = "D071405000000002306 ПРОГРАММ ХАНГАМЖИЙН ИНЖЕНЕРЧЛЭЛ"
-    studentID_expected = USERNAME
+    studentID_expected = "B232270015"
 
     assert student_data["major"] == major_expected, "Мэргэжил таарахгүй байна!"
     print(f"Profession is correct: {student_data['major']}")
@@ -101,7 +93,6 @@ try:
     assert student_data["studentID"] == studentID_expected, "Оюутны код таарахгүй байна!"
     print(f"Student ID is correct: {student_data['studentID']}")
 
-    # Гарах
     logout_button = WebDriverWait(driver, 3).until(
         EC.presence_of_element_located((By.XPATH, '//a[span[text()="Гарах"]]'))
     )
@@ -111,4 +102,4 @@ except Exception as e:
     print("Error:", e)
 
 finally:
-    print("Browser is closed.")
+    print("Browser is closed.")  
